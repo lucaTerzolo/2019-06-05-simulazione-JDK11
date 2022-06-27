@@ -25,13 +25,13 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
-    private ComboBox<?> boxMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxGiorno"
-    private ComboBox<?> boxGiorno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxGiorno; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnCreaReteCittadina"
     private Button btnCreaReteCittadina; // Value injected by FXMLLoader
@@ -47,12 +47,41 @@ public class FXMLController {
 
     @FXML
     void doCreaReteCittadina(ActionEvent event) {
-
+    	Integer anno=this.boxAnno.getValue();
+    	if(anno==null)
+    		return;
+    	String msg=this.model.creaGrafo(anno);
+    	this.txtResult.setText(msg);
+    	msg=this.model.stampaVicini();
+    	this.txtResult.appendText(msg);
+    	this.btnSimula.setDisable(false);
+    	this.boxGiorno.setDisable(false);
+    	this.boxMese.setDisable(false);
     }
 
     @FXML
     void doSimula(ActionEvent event) {
-
+    	int n=0;
+    	Integer giorno=0;
+    	Integer mese=0;
+    	Integer anno=0;
+    	
+    	try {
+    		n=Integer.parseInt(this.txtN.getText());
+    	}catch(NumberFormatException e) {
+    		e.printStackTrace();
+    	}
+    	if(n<=0&&n>10) {
+    		return;
+    	}
+    	giorno=this.boxGiorno.getValue();
+    	mese=this.boxMese.getValue();
+    	anno=this.boxAnno.getValue();
+    	if(giorno==null||mese==null||anno==null)
+    		return;
+    	int malGestiti=this.model.simulatore(n, giorno, mese, anno);
+    	this.txtResult.setText("Simulazione della situazione con: "+n+" agenti\n"
+    			+ "Data simulata: "+giorno+"-"+mese+"-"+anno+"\nEventi mal gestiti: "+malGestiti);
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -69,5 +98,15 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxAnno.getItems().addAll(this.model.getAnni());
+    	this.btnSimula.setDisable(true);
+    	for(int i=1;i<=31;i++) {
+    		this.boxGiorno.getItems().add(i);
+    	}
+    	for(int i=1;i<=12;i++) {
+    		this.boxMese.getItems().add(i);
+    	}
+    	this.boxGiorno.setDisable(true);
+    	this.boxMese.setDisable(true);
     }
 }
